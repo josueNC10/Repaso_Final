@@ -1,0 +1,147 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns # <-- Debe estar aquí
+
+# Configuración para que los gráficos se vean mejor
+sns.set_style("whitegrid")
+plt.rcParams['figure.figsize'] = (10, 6)
+
+# --- CREACIÓN DE DATOS SIMULADOS ---
+# Simular un conjunto de datos para el análisis
+np.random.seed(42)  # Para reproducibilidad
+
+# Variables de simulación
+nacionalidades = ['USA', 'Canadá', 'Alemania', 'Francia', 'España', 'México', 'Reino Unido']
+puntos_entrada = ['Aeropuerto Internacional Juan Santamaría', 'Aeropuerto Internacional Daniel Oduber Quirós', 'Frontera Peñas Blancas', 'Frontera Paso Canoas']
+años = [2020, 2021, 2022, 2023]
+meses = range(1, 13)
+
+datos = []
+for año in años:
+    for mes in meses:
+        for _ in range(30):  # Simular 30 registros por mes
+            nacionalidad = np.random.choice(nacionalidades, p=[0.4, 0.15, 0.1, 0.1, 0.05, 0.1, 0.1])
+            punto = np.random.choice(puntos_entrada, p=[0.5, 0.3, 0.1, 0.1])
+            
+            # Ajustar llegadas: más llegadas en temporada alta (Dic-Mar y Jun-Ago)
+            # Y ajustando por año (simulando crecimiento post-pandemia)
+            if mes in [12, 1, 2, 7, 8]:
+                llegadas = np.random.randint(100, 500) * (1 + (año - 2020) * 0.2)
+            else:
+                llegadas = np.random.randint(50, 300) * (1 + (año - 2020) * 0.2)
+            
+            # Más llegadas de USA y en el SJO
+            if nacionalidad == 'USA' and punto == 'Aeropuerto Internacional Juan Santamaría':
+                llegadas *= 1.5
+
+            datos.append({
+                'Fecha': pd.to_datetime(f'{año}-{mes:02d}-01'),
+                'Nacionalidad': nacionalidad,
+                'Llegadas': int(llegadas),
+                'Punto de Entrada': punto
+            })
+
+df = pd.DataFrame(datos)
+df.sort_values(by='Fecha', inplace=True)
+
+print("--- DataFrame de Datos Simulados ---")
+print(df.head())
+print(f"\nNúmero total de registros: {len(df)}")
+
+
+
+
+
+
+
+
+# --- ANÁLISIS DESCRIPTIVO ---
+
+print("\n" + "="*50)
+print("             RESULTADOS DEL ANÁLISIS")
+print("="*50)
+
+# 1. Evolución del número de turistas a lo largo de los años (Tendencia Anual)
+evolucion_anual = df.groupby(df['Fecha'].dt.year)['Llegadas'].sum().reset_index()
+evolucion_anual.columns = ['Año', 'Total de Turistas']
+print("\n## 1. Evolución Anual del Número de Turistas:")
+print(evolucion_anual)
+
+# 2. Países que más turistas envían (Perfil del Visitante)
+paises_principales = df.groupby('Nacionalidad')['Llegadas'].sum().nlargest(5).reset_index()
+print("\n## 2. Top 5 Países de Origen (Por Número Total de Turistas):")
+print(paises_principales)
+
+# 3. Existencia de temporadas altas y bajas (Estacionalidad)
+df['Mes'] = df['Fecha'].dt.month
+estacionalidad = df.groupby('Mes')['Llegadas'].mean().reset_index()
+estacionalidad.columns = ['Mes', 'Promedio Mensual de Llegadas']
+# Ordenar por el promedio para identificar picos
+estacionalidad_ordenada = estacionalidad.sort_values(by='Promedio Mensual de Llegadas', ascending=False)
+print("\n## 3. Estacionalidad (Promedio Mensual de Llegadas - para identificar Temporadas Altas/Bajas):")
+print(estacionalidad_ordenada)
+
+# 4. Aeropuertos o fronteras terrestres más utilizados (Puntos de Entrada)
+puntos_entrada_uso = df.groupby('Punto de Entrada')['Llegadas'].sum().sort_values(ascending=False).reset_index()
+print("\n## 4. Puntos de Entrada más Utilizados (Por Número Total de Turistas):")
+print(puntos_entrada_uso)
+
+
+
+
+
+
+
+
+
+
+# --- VISUALIZACIÓN DE DATOS ---
+
+print("\n" + "="*50)
+print("             VISUALIZACIÓN DE DATOS")
+print("="*50)
+
+# 1. Gráfico de Líneas para la Evolución Anual (Respuesta a la Pregunta 1)
+plt.figure(figsize=(10, 5))
+sns.lineplot(data=evolucion_anual, x='Año', y='Total de Turistas', marker='o', color='green')
+plt.title('Evolución Anual del Número Total de Turistas en Costa Rica')
+plt.xlabel('Año')
+plt.ylabel('Total de Turistas (Millones/Miles)')
+plt.xticks(evolucion_anual['Año'])
+plt.grid(True, axis='y')
+plt.show()
+#
+# 2. Gráfico de Barras para las Nacionalidades (Respuesta a la Pregunta 2)
+plt.figure(figsize=(12, 6))
+sns.barplot(x='Llegadas', y='Nacionalidad', data=paises_principales, palette='viridis')
+plt.title('Top 5 Países que más Turistas envían a Costa Rica')
+plt.xlabel('Total de Llegadas')
+plt.ylabel('Nacionalidad')
+plt.show()
+#
+# 3. Gráfico de Barras para la Estacionalidad (Respuesta a la Pregunta 3)
+# Usaremos los nombres de los meses para mejor visualización
+nombres_meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+estacionalidad['Nombre_Mes'] = estacionalidad['Mes'].apply(lambda x: nombres_meses[x-1])
+
+plt.figure(figsize=(12, 6))
+# Paleta de colores para resaltar la estacionalidad
+colores = ['#4daf4a' if mes in [12, 1, 2, 7, 8] else '#377eb8' for mes in estacionalidad['Mes']] 
+sns.barplot(x='Nombre_Mes', y='Promedio Mensual de Llegadas', data=estacionalidad, palette=colores)
+plt.title('Promedio Mensual de Llegadas de Turistas (Estacionalidad)')
+plt.xlabel('Mes')
+plt.ylabel('Promedio de Llegadas')
+plt.show()
+#
+# 4. Gráfico de Barras para Puntos de Entrada (Respuesta a la Pregunta 4)
+plt.figure(figsize=(12, 7))
+# Reutilizar el Dataframe de puntos de entrada, normalizando el nombre para el gráfico
+puntos_entrada_uso['Punto de Entrada Corto'] = puntos_entrada_uso['Punto de Entrada'].apply(lambda x: x.split('(')[0].strip() if ')' in x else x)
+sns.barplot(x='Llegadas', y='Punto de Entrada', data=puntos_entrada_uso, palette='cividis')
+plt.title('Uso de Puntos de Entrada (Aeropuertos y Fronteras)')
+plt.xlabel('Total de Turistas')
+plt.ylabel('Punto de Entrada')
+plt.show()
+#
+# --- Fin del Código ---
