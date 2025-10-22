@@ -1,7 +1,7 @@
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+import pandas as pd # Para manipulación de datos
+import numpy as np # Para generación de datos simulados
+import matplotlib.pyplot as plt # Para gráficos
+import seaborn as sns #esto es para los estilos de los gráficos
 import sys # Para salir del programa de forma limpia
 
 # Configuración de estilo
@@ -30,7 +30,7 @@ def mostrar_evolucion_anual():
     plt.title('1. Evolución Anual del Número Total de Turistas en Costa Rica', fontsize=16)
     plt.xlabel('Año')
     plt.ylabel('Total de Turistas')
-    plt.xticks(evolucion_anual['Año'].unique()) # Asegura que solo salgan los años existentes
+    plt.xticks(evolucion_anual['Año'].unique())
     plt.grid(True, axis='y')
     plt.show()
 
@@ -56,7 +56,7 @@ def mostrar_estacionalidad():
     print(estacionalidad.sort_values(by='Promedio Mensual de Llegadas', ascending=False)) 
     
     nombres_meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
-    # Crea Nombre_Mes si aún no existe (se hace para la tabla, pero se necesita para el gráfico)
+   
     temp_estacionalidad = estacionalidad.copy()
     temp_estacionalidad['Nombre_Mes'] = temp_estacionalidad['Mes'].apply(lambda x: nombres_meses[x-1])
 
@@ -92,10 +92,10 @@ def mostrar_puntos_entrada():
 def cargar_datos():
     """Carga los datos reales o genera datos simulados si falla la carga."""
     global df
-    NOMBRE_ARCHIVO = 'datos_reales_ict.xlsx' # ¡AJUSTA ESTO!
+    NOMBRE_ARCHIVO = 'datos_reales_ict.xlsx' 
 
     try:
-        # --- Lógica de carga de archivo ---
+       
         if NOMBRE_ARCHIVO.endswith('.csv'):
             df = pd.read_csv(NOMBRE_ARCHIVO)
         elif NOMBRE_ARCHIVO.endswith(('.xls', '.xlsx')):
@@ -105,8 +105,7 @@ def cargar_datos():
 
         print(f"\n--- DataFrame de Datos Oficiales '{NOMBRE_ARCHIVO}' Cargado ---")
 
-        # --- Lógica de procesamiento de datos reales ---
-        # Asegúrate de que las columnas 'Año', 'Mes', 'Llegadas', 'Nacionalidad', 'Punto de Entrada' existan y estén renombradas correctamente en tu archivo
+       
         if 'Año' in df.columns and 'Mes' in df.columns:
             df['Fecha'] = pd.to_datetime(df['Año'].astype(str) + '-' + df['Mes'].astype(str) + '-01')
         elif 'Fecha' in df.columns:
