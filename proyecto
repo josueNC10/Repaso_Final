@@ -9,23 +9,24 @@ sns.set_style("whitegrid")
 plt.rcParams['figure.figsize'] = (12, 7) 
 
 # Variables globales para almacenar los resultados de los cálculos
-evolucion_anual = pd.DataFrame()
-paises_principales = pd.DataFrame()
-estacionalidad = pd.DataFrame()
-puntos_entrada_uso = pd.DataFrame()
+evolucion_anual = pd.DataFrame() # DataFrame de evolución anual
+paises_principales = pd.DataFrame() #dataframe de países principales
+estacionalidad = pd.DataFrame() # DataFrame de estacionalidad
+puntos_entrada_uso = pd.DataFrame() # DataFrame de puntos de entrada
 df = pd.DataFrame() # DataFrame principal
 
 
 # 1. FUNCIONES DE VISUALIZACIÓN
 
-def mostrar_evolucion_anual():
+def mostrar_evolucion_anual(): # Función para mostrar la evolución anual
     """Muestra la tabla y el gráfico de la evolución anual."""
     print("\n" + "-"*50)
     print("ANALISIS 1: EVOLUCIÓN ANUAL DE TURISTAS")
     print("-" * 50)
     print(evolucion_anual)
 
-    plt.figure(figsize=(10, 5))
+# Gráfico de línea para evolución anual
+    plt.figure(figsize=(10, 5)) 
     sns.lineplot(data=evolucion_anual, x='Año', y='Total de Turistas', marker='o', color='#2ecc71', linewidth=3)
     plt.title('1. Evolución Anual del Número Total de Turistas en Costa Rica', fontsize=16)
     plt.xlabel('Año')
@@ -34,13 +35,14 @@ def mostrar_evolucion_anual():
     plt.grid(True, axis='y')
     plt.show()
 
-def mostrar_top_paises():
+def mostrar_top_paises(): # Función para mostrar los principales países de origen
     """Muestra la tabla y el gráfico de los principales países de origen."""
     print("\n" + "-"*50)
     print("ANALISIS 2: TOP 5 PAÍSES DE ORIGEN")
     print("-" * 50)
     print(paises_principales)
     
+    # Gráfico de barras para países principales
     plt.figure(figsize=(10, 6))
     sns.barplot(x='Total de Turistas', y='Nacionalidad', data=paises_principales, palette='viridis')
     plt.title('2. Top 5 Países que más Turistas envían a Costa Rica', fontsize=16)
@@ -48,18 +50,20 @@ def mostrar_top_paises():
     plt.ylabel('Nacionalidad')
     plt.show()
 
-def mostrar_estacionalidad():
+def mostrar_estacionalidad(): # Función para mostrar la estacionalidad
     """Muestra la tabla y el gráfico de la estacionalidad."""
     print("\n" + "-"*50)
     print("ANALISIS 3: ESTACIONALIDAD (PROMEDIO MENSUAL)")
     print("-" * 50)
     print(estacionalidad.sort_values(by='Promedio Mensual de Llegadas', ascending=False)) 
     
+    # Gráfico de barras para estacionalidad
     nombres_meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
    
     temp_estacionalidad = estacionalidad.copy()
     temp_estacionalidad['Nombre_Mes'] = temp_estacionalidad['Mes'].apply(lambda x: nombres_meses[x-1])
-
+    
+    #colores para resaltar los meses con más llegadas
     plt.figure(figsize=(10, 6))
     colores_estac = ['#3498db'] * 12
     # Resaltar los 3 meses con más llegadas
@@ -72,13 +76,14 @@ def mostrar_estacionalidad():
     plt.ylabel('Promedio de Llegadas')
     plt.show()
 
-def mostrar_puntos_entrada():
+def mostrar_puntos_entrada(): # Función para mostrar los puntos de entrada más utilizados
     """Muestra la tabla y el gráfico de los puntos de entrada."""
     print("\n" + "-"*50)
     print("ANALISIS 4: PUNTOS DE ENTRADA MÁS UTILIZADOS")
     print("-" * 50)
     print(puntos_entrada_uso)
     
+    # Gráfico de barras para puntos de entrada
     plt.figure(figsize=(10, 6))
     sns.barplot(x='Total de Llegadas', y='Punto de Entrada', data=puntos_entrada_uso, palette='cividis')
     plt.title('4. Uso de Puntos de Entrada (Aeropuertos y Fronteras)', fontsize=16)
@@ -89,7 +94,7 @@ def mostrar_puntos_entrada():
 
 # 2. FUNCIONES DE CARGA Y CÁLCULOS (El núcleo de los datos)
 
-def cargar_datos():
+def cargar_datos(): # Función para cargar los datos
     """Carga los datos reales o genera datos simulados si falla la carga."""
     global df
     NOMBRE_ARCHIVO = 'datos_reales_ict.xlsx' 
@@ -123,11 +128,12 @@ def cargar_datos():
         # --- Lógica de respaldo con datos simulados ---
         print(f"\nADVERTENCIA: Archivo oficial no encontrado o error en el formato ({e}). Creando datos simulados para la demostración.")
         
-        np.random.seed(42)
+        np.random.seed(42) 
         nacionalidades = ['USA', 'Canadá', 'Alemania', 'Francia', 'España', 'México', 'Reino Unido']
         puntos_entrada = ['Aeropuerto Internacional Juan Santamaría', 'Aeropuerto Internacional Daniel Oduber Quirós', 'Frontera Peñas Blancas', 'Frontera Paso Canoas']
         años = [2022, 2023, 2024, 2025]
         
+        # Generar datos simulados
         datos = []
         for año in años:
             for mes in range(1, 13):
@@ -146,7 +152,7 @@ def cargar_datos():
         print(f"Número total de registros: {len(df)}")
 
 
-def realizar_calculos():
+def realizar_calculos(): # Función para realizar los cálculos descriptivos
     """Realiza todos los cálculos descriptivos y los guarda en variables globales."""
     global evolucion_anual, paises_principales, estacionalidad, puntos_entrada_uso
     
@@ -171,7 +177,7 @@ def realizar_calculos():
 
 # 3. FUNCIÓN PRINCIPAL Y MENÚ
 
-def mostrar_menu():
+def mostrar_menu(): # Función para mostrar el menú
     """Muestra el menú de opciones al usuario."""
     print("\n" + "="*50)
     print("         MENÚ DE ANÁLISIS DE TURISMO C.R.")
